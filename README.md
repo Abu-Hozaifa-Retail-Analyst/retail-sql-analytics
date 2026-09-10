@@ -19,7 +19,7 @@ Aggregation & GROUP BY · Multi-table JOINs · Self-joins · Subqueries
 | 1 | [Cohort Retention Analysis](./01_cohort_retention) | What % of new customers come back to buy again, and when? | CTEs, `DATEDIFF`, self-referencing joins | Retention drops to 8.2% by month 1, but rebounds to 10.7% at month 2 — win-back campaigns may be timed too early |
 | 2 | [RFM Segmentation](./02_rfm_segmentation) | Which customers are most valuable, and which are at risk of churning? | `NTILE()`, `CASE`, window functions | Champions spend 5.6x more than Lost customers — but "About to Sleep" customers are nearly as valuable as Loyal ones, suggesting misprioritized win-back spend |
 | 3 | [Market Basket Analysis](./03_market_basket_analysis) | Which products are commonly bought together? | Self-joins, aggregation | Electronics/home_appliances dominate top co-purchase pairs — signal lives at the category level, not individual SKUs |
-| 4 | Churn Detection *(coming soon)* | Which active customers show early signs of going inactive? | `LAG`/`LEAD`, window functions | — |
+| 4 | [Churn Risk Detection](./04_churn_detection) | Which active customers show early signs of going inactive? | `LAG`/`LEAD`, window functions | Flagged customers average 31.5x their normal ordering gap — the threshold catches already-lost customers, not early risks |
 | 5 | Pricing & Discount Analysis *(coming soon)* | Are discounts actually driving incremental volume, or just margin loss? | Percentile functions, CTEs | — |
 
 ## Dataset
