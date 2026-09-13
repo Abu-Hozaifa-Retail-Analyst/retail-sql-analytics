@@ -1,5 +1,10 @@
 # Retail SQL Analytics
 
+![SQL Server](https://img.shields.io/badge/SQL_Server-CC2927?style=flat&logo=microsoftsqlserver&logoColor=white)
+![T-SQL](https://img.shields.io/badge/T--SQL-4479A1?style=flat&logo=databricks&logoColor=white)
+![License](https://img.shields.io/badge/license-MIT-blue?style=flat)
+![Status](https://img.shields.io/badge/status-active-brightgreen?style=flat)
+
 SQL portfolio project demonstrating retail/e-commerce business analysis —
 customer retention, segmentation, and purchasing behavior — using T-SQL
 (SQL Server) on a realistic e-commerce dataset.
@@ -12,6 +17,18 @@ contains the query, a written business finding, and sample output.
 CTEs · Window functions (`LAG`, `NTILE`, `PERCENTILE_CONT`) · Date/time
 functions · CASE statements · Aggregation & GROUP BY · Multi-table JOINs ·
 Self-joins · Subqueries
+
+| Technique | Used in |
+|---|---|
+| CTEs (multi-step) | Projects 1, 2, 3, 4, 5 |
+| Window functions — `NTILE()` | Project 2, 5 |
+| Window functions — `LAG()` | Project 4 |
+| Window functions — `PERCENTILE_CONT()` | Project 5 |
+| `CASE` statements | Project 2 |
+| Self-joins | Project 3 |
+| Subqueries (scalar) | Projects 1, 2, 4 |
+| `DATEDIFF` / date logic | Projects 1, 2, 4 |
+| Multi-table JOINs | All projects |
 
 ## Projects
 
@@ -32,3 +49,6 @@ for schema details and setup instructions.
 
 ## Tools
 SQL Server / T-SQL, SSMS
+
+## License
+MIT — see [LICENSE](./LICENSE)
