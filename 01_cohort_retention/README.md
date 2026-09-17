@@ -22,6 +22,19 @@ trap in e-commerce schemas that inflates churn if missed.
 
 See [`query.sql`](./query.sql) for the full implementation.
 
+## Stored Procedure (Advanced)
+This analysis is also available as a reusable stored procedure —
+[`usp_CohortRetention.sql`](./usp_CohortRetention.sql) — with optional
+`@start_date` / `@end_date` parameters, so it can be called for a specific
+cohort window instead of always scanning the full dataset:
+
+```sql
+EXEC dbo.usp_CohortRetention;                                    -- all cohorts
+EXEC dbo.usp_CohortRetention @start_date = '2023-06-01';         -- from June 2023 onward
+EXEC dbo.usp_CohortRetention @start_date = '2023-01-01',
+                              @end_date   = '2023-06-30';        -- H1 2023 cohorts only
+```
+
 ## Finding
 Retention drops sharply immediately after the first purchase — across
 cohorts, only **8.2% of customers on average return in month 1**, confirming

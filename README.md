@@ -40,6 +40,14 @@ Self-joins · Subqueries
 | 4 | [Churn Risk Detection](./04_churn_detection) | Which active customers show early signs of going inactive? | `LAG`/`LEAD`, window functions | Flagged customers average 31.5x their normal ordering gap — the threshold catches already-lost customers, not early risks |
 | 5 | [Pricing & Discount Analysis](./05_pricing_discount_analysis) | Are discounts actually driving incremental volume, or just margin loss? | Percentile functions, CTEs | No meaningful discount pattern found across categories — a null result showing the dataset can't support this question without real promotion-level data |
 
+## Advanced Patterns
+Beyond the core analyses, select projects include production-oriented SQL
+patterns:
+
+| Pattern | Where |
+|---|---|
+| Stored procedures (parameterized, reusable) | [Project 1](./01_cohort_retention/usp_CohortRetention.sql) |
+
 ## Dataset
 A synthetic e-commerce dataset (`/datasets`) modeled on the structure of the
 [Olist Brazilian E-Commerce dataset](https://www.kaggle.com/datasets/olistbr/brazilian-ecommerce),
