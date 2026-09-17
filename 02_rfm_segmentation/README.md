@@ -27,6 +27,21 @@ Server:
 
 See [`query.sql`](./query.sql) for the full implementation.
 
+## View (Advanced)
+This segmentation logic is also available as a reusable view —
+[`vw_CustomerRFM.sql`](./vw_CustomerRFM.sql) — so any future query, report,
+or BI tool can treat customer segments as a plain table instead of
+re-pasting the full 6-CTE query every time:
+
+```sql
+SELECT * FROM dbo.vw_CustomerRFM;
+
+SELECT rfm_segment, COUNT(*) AS customer_count
+FROM dbo.vw_CustomerRFM
+GROUP BY rfm_segment
+ORDER BY customer_count DESC;
+```
+
 ## Finding
 Champions — the top 16.7% of customers — spend an average of **$1,688.59**,
 more than **5.6x** what the Lost segment (28.5% of the customer base)

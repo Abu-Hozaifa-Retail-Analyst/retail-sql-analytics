@@ -50,6 +50,7 @@ patterns:
 |---|---|
 | Stored procedures (parameterized, reusable) | [Project 1](./01_cohort_retention/usp_CohortRetention.sql) |
 | Recursive CTEs (gap-safe date spine) | [Project 6](./06_sales_trend_yoy) |
+| Views (reusable business logic) | [Project 2](./02_rfm_segmentation/vw_CustomerRFM.sql) |
 
 ## Dataset
 A synthetic e-commerce dataset (`/datasets`) modeled on the structure of the

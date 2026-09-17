@@ -1,15 +1,22 @@
 /* ============================================================
-   Project: RFM Customer Segmentation
-   Business Question: Which customers are most valuable and worth
-   protecting, and which are showing signs of churn risk?
+   View: vw_CustomerRFM
+   Wraps Project 2's RFM segmentation logic as a reusable view,
+   so any future query (or BI tool) can treat customer segments
+   as a plain table instead of re-pasting the full 6-CTE query.
+
+   Example usage:
+     SELECT * FROM dbo.vw_CustomerRFM;
+
+     SELECT rfm_segment, COUNT(*) AS customer_count
+     FROM dbo.vw_CustomerRFM
+     GROUP BY rfm_segment
+     ORDER BY customer_count DESC;
 
    Dialect: SQL Server (T-SQL)
    ============================================================ */
 
+CREATE OR ALTER VIEW dbo.vw_CustomerRFM AS
 WITH recency AS (
-    -- Days since each customer's most recent order, measured
-    -- against the latest date present in the dataset (treated as
-    -- "today" since this is a historical snapshot, not live data).
     SELECT
         c.customer_unique_id,
         DATEDIFF(DAY, MAX(o.order_purchase_timestamp),
@@ -20,8 +27,6 @@ WITH recency AS (
 ),
 
 frequency AS (
-    -- Total delivered orders per customer. Canceled orders are
-    -- excluded -- they aren't real engagement.
     SELECT
         c.customer_unique_id,
         COUNT(*) AS order_count
@@ -32,7 +37,6 @@ frequency AS (
 ),
 
 monetary AS (
-    -- Total amount spent across delivered orders.
     SELECT
         c.customer_unique_id,
         SUM(p.payment_value) AS total_spent
@@ -44,7 +48,6 @@ monetary AS (
 ),
 
 rfm_base AS (
-    -- Combine the three metrics per customer.
     SELECT
         r.customer_unique_id,
         r.recency_days,
@@ -56,10 +59,6 @@ rfm_base AS (
 ),
 
 rfm_scores AS (
-    -- Score each dimension 1-5 using NTILE. Recency is sorted
-    -- DESC because a SMALLER recency_days (bought more recently)
-    -- should map to a HIGHER score -- the opposite direction of
-    -- frequency/monetary, where a bigger raw number is already "better."
     SELECT
         customer_unique_id,
         recency_days,
@@ -72,8 +71,6 @@ rfm_scores AS (
 ),
 
 rfm_buckets AS (
-    -- Average F and M into one "value" signal, then bucket both
-    -- R and F&M into High/Mid/Low for the segment grid.
     SELECT
         customer_unique_id,
         recency_score,
@@ -94,8 +91,6 @@ rfm_buckets AS (
 ),
 
 rfm_segments AS (
-    -- Map the (recency_bucket, fm_bucket) pair to the classic
-    -- 9-segment RFM grid.
     SELECT
         customer_unique_id,
         recency_score,
@@ -117,14 +112,15 @@ rfm_segments AS (
     FROM rfm_buckets
 )
 
--- Final output: segment-level summary with size, share of base,
--- and average spend -- this is the table that drives the business finding.
-SELECT
-    rfm_segment,
-    COUNT(*) AS customer_count,
-    CAST(100.0 * COUNT(*) / SUM(COUNT(*)) OVER () AS DECIMAL(5,1)) AS pct_of_customers,
-    CAST(AVG(total_spent) AS DECIMAL(10,2)) AS avg_spent
-FROM rfm_segments r
-JOIN rfm_base b ON r.customer_unique_id = b.customer_unique_id
-GROUP BY rfm_segment
-ORDER BY customer_count DESC;
+SELECT * FROM rfm_segments;
+GO
+
+/* ------------------------------------------------------------
+   Example usage
+   ------------------------------------------------------------ */
+-- SELECT * FROM dbo.vw_CustomerRFM;
+--
+-- SELECT rfm_segment, COUNT(*) AS customer_count
+-- FROM dbo.vw_CustomerRFM
+-- GROUP BY rfm_segment
+-- ORDER BY customer_count DESC;
