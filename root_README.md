@@ -20,14 +20,15 @@ Self-joins · Subqueries
 
 | Technique | Used in |
 |---|---|
-| CTEs (multi-step) | Projects 1, 2, 3, 4, 5 |
+| CTEs (multi-step) | Projects 1, 2, 3, 4, 5, 6 |
+| Recursive CTEs (date spine generation) | Project 6 |
 | Window functions — `NTILE()` | Project 2, 5 |
-| Window functions — `LAG()` | Project 4 |
+| Window functions — `LAG()` | Project 4, 6 |
 | Window functions — `PERCENTILE_CONT()` | Project 5 |
 | `CASE` statements | Project 2 |
 | Self-joins | Project 3 |
 | Subqueries (scalar) | Projects 1, 2, 4 |
-| `DATEDIFF` / date logic | Projects 1, 2, 4 |
+| `DATEDIFF` / date logic | Projects 1, 2, 4, 6 |
 | Multi-table JOINs | All projects |
 
 ## Projects
@@ -39,6 +40,7 @@ Self-joins · Subqueries
 | 3 | [Market Basket Analysis](./03_market_basket_analysis) | Which products are commonly bought together? | Self-joins, aggregation | Electronics/home_appliances dominate top co-purchase pairs — signal lives at the category level, not individual SKUs |
 | 4 | [Churn Risk Detection](./04_churn_detection) | Which active customers show early signs of going inactive? | `LAG`/`LEAD`, window functions | Flagged customers average 31.5x their normal ordering gap — the threshold catches already-lost customers, not early risks |
 | 5 | [Pricing & Discount Analysis](./05_pricing_discount_analysis) | Are discounts actually driving incremental volume, or just margin loss? | Percentile functions, CTEs | No meaningful discount pattern found across categories — a null result showing the dataset can't support this question without real promotion-level data |
+| 6 | [Sales Trend & YoY Growth](./06_sales_trend_yoy) | What does real sales growth look like, and are we missing zero-sales months? | Recursive CTEs, `LAG()` (multi-offset) | Every month in 2024 beat 2023 (+20.6% to +143.3% YoY) — but MoM swings wildly and can mislead if used alone |
 
 ## Advanced Patterns
 Beyond the core analyses, select projects include production-oriented SQL
@@ -47,6 +49,7 @@ patterns:
 | Pattern | Where |
 |---|---|
 | Stored procedures (parameterized, reusable) | [Project 1](./01_cohort_retention/usp_CohortRetention.sql) |
+| Recursive CTEs (gap-safe date spine) | [Project 6](./06_sales_trend_yoy) |
 
 ## Dataset
 A synthetic e-commerce dataset (`/datasets`) modeled on the structure of the
