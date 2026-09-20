@@ -18,11 +18,11 @@
 
 IF DB_ID('RetailAnalytics') IS NULL
 BEGIN
-    CREATE DATABASE RetailAnalytics;
+    CREATE DATABASE RetailAnalytics1;
 END
 GO
 
-USE RetailAnalytics;
+USE RetailAnalytics1;
 GO
 
 -- Drop tables if re-running
