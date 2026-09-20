@@ -46,6 +46,24 @@ index** solves this by only indexing the specific slice of rows the
 queries actually ask for, making it small and genuinely selective instead
 of redundant with the base table.
 
+### 4. `orders (customer_id, order_purchase_timestamp)`
+**Used by:** Project 4 (Churn Detection), whose `LAG()` window function
+needs rows grouped by customer and ordered by purchase date:
+```sql
+LAG(o.order_purchase_timestamp) OVER (
+    PARTITION BY c.customer_unique_id
+    ORDER BY o.order_purchase_timestamp
+)
+```
+Without this index, SQL Server has to perform an expensive sort operation
+every time this query runs, just to satisfy `PARTITION BY ... ORDER BY`.
+`customer_id` plays the grouping role (same as `PARTITION BY`) and comes
+first; `order_purchase_timestamp` plays the ordering role (same as
+`ORDER BY`) and comes second — with data already physically stored this
+way, SQL Server can potentially skip the sort step entirely. This is a
+more advanced indexing case: indexes that support **window functions**,
+not just joins and filters.
+
 See [`indexes.sql`](./indexes.sql) for the runnable `CREATE INDEX`
 statements with full inline reasoning.
 

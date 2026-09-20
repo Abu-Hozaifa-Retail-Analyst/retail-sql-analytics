@@ -53,3 +53,22 @@ ON orders (customer_id);
 CREATE NONCLUSTERED INDEX IX_Orders_Delivered
 ON orders (order_id)
 WHERE order_status = 'delivered';
+
+-- --------------------------------------------------------------
+-- 4. orders (customer_id, order_purchase_timestamp)
+-- --------------------------------------------------------------
+-- Used by: Project 4 (Churn Detection), whose LAG() window function
+-- requires rows grouped by customer and ordered by purchase date:
+--   LAG(o.order_purchase_timestamp) OVER (
+--       PARTITION BY c.customer_unique_id
+--       ORDER BY o.order_purchase_timestamp
+--   )
+-- Without this index, SQL Server must perform an expensive sort
+-- operation every time this query runs, just to satisfy the
+-- PARTITION BY / ORDER BY combination. customer_id is listed first
+-- (the PARTITION BY / grouping role), order_purchase_timestamp
+-- second (the ORDER BY / sorting-within-group role) -- with data
+-- already physically stored in this order, SQL Server can
+-- potentially skip the sort step entirely.
+CREATE NONCLUSTERED INDEX IX_Orders_CustomerID_PurchaseTimestamp
+ON orders (customer_id, order_purchase_timestamp);
