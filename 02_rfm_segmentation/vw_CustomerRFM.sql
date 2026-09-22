@@ -124,3 +124,52 @@ GO
 -- FROM dbo.vw_CustomerRFM
 -- GROUP BY rfm_segment
 -- ORDER BY customer_count DESC;
+USE RetailAnalytics1;
+GO
+
+-- Run this once, to create the snapshot table
+CREATE TABLE dbo.CustomerRFMSnapshot (
+    customer_unique_id VARCHAR(20) NOT NULL,
+    recency_score       INT,
+    frequency_score      INT,
+    monetary_score        INT,
+    recency_bucket         VARCHAR(10),
+    fm_bucket                VARCHAR(10),
+    rfm_segment                VARCHAR(30)
+);
+
+CREATE OR ALTER PROCEDURE dbo.usp_RefreshRFMSnapshot 
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        -- Step 1: clear out the old snapshot
+        TRUNCATE TABLE dbo.CustomerRFMSnapshot;
+
+        -- Step 2: reload it from the live view
+        INSERT INTO dbo.CustomerRFMSnapshot
+        SELECT * FROM dbo.vw_CustomerRFM;
+
+        COMMIT TRANSACTION;
+
+        PRINT 'RFM snapshot refreshed successfully.';
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+            ROLLBACK TRANSACTION;
+
+        DECLARE @ErrorMessage NVARCHAR(4000) = ERROR_MESSAGE();
+        THROW 50000, @ErrorMessage, 1;
+    END CATCH
+END
+
+EXEC dbo.usp_RefreshRFMSnapshot
+
+SELECT COUNT(*) FROM dbo.CustomerRFMSnapshot;
+
+SELECT
+    COUNT(*)
+FROM dbo.CustomerRFMSnapshot
