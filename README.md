@@ -14,33 +14,25 @@ would actually be asked, not just an isolated SQL exercise. Every folder
 contains the query, a written business finding, and sample output.
 
 ## Skills demonstrated
-CTEs · Window functions (`LAG`, `NTILE`, `PERCENTILE_CONT`) · Date/time
-functions · CASE statements · Aggregation & GROUP BY · Multi-table JOINs ·
-Self-joins · Subqueries
+CTEs · Window functions (`LAG`, `NTILE`, `PERCENTILE_CONT`, window frames)
+· Date/time functions · CASE statements · Aggregation & GROUP BY ·
+Multi-table JOINs · Self-joins · `CROSS JOIN` · Subqueries (scalar &
+correlated)
 
 | Technique | Used in |
 |---|---|
-| CTEs (multi-step) | Projects 1, 2, 3, 4, 5, 6 |
+| CTEs (multi-step) | Projects 1, 2, 3, 4, 5, 6, 7 |
 | Recursive CTEs (date spine generation) | Project 6 |
 | Window functions — `NTILE()` | Project 2, 5 |
 | Window functions — `LAG()` | Project 4, 6 |
 | Window functions — `PERCENTILE_CONT()` | Project 5 |
+| Window frames (`ROWS BETWEEN ... PRECEDING`) | Project 7 |
 | `CASE` statements | Project 2 |
 | Self-joins | Project 3 |
-| Subqueries (scalar) | Projects 1, 2, 4 |
+| `CROSS JOIN` | Project 7 |
+| Subqueries (scalar) | Projects 1, 2, 4, 7 |
 | `DATEDIFF` / date logic | Projects 1, 2, 4, 6 |
 | Multi-table JOINs | All projects |
-
-## Projects
-
-| # | Project | Business Question | SQL Techniques | Key Finding |
-|---|---|---|---|---|
-| 1 | [Cohort Retention Analysis](./01_cohort_retention) | What % of new customers come back to buy again, and when? | CTEs, `DATEDIFF`, self-referencing joins | Retention drops to 8.2% by month 1, but rebounds to 10.7% at month 2 — win-back campaigns may be timed too early |
-| 2 | [RFM Segmentation](./02_rfm_segmentation) | Which customers are most valuable, and which are at risk of churning? | `NTILE()`, `CASE`, window functions | Champions spend 5.6x more than Lost customers — but "About to Sleep" customers are nearly as valuable as Loyal ones, suggesting misprioritized win-back spend |
-| 3 | [Market Basket Analysis](./03_market_basket_analysis) | Which products are commonly bought together? | Self-joins, aggregation | Electronics/home_appliances dominate top co-purchase pairs — signal lives at the category level, not individual SKUs |
-| 4 | [Churn Risk Detection](./04_churn_detection) | Which active customers show early signs of going inactive? | `LAG`/`LEAD`, window functions | Flagged customers average 31.5x their normal ordering gap — the threshold catches already-lost customers, not early risks |
-| 5 | [Pricing & Discount Analysis](./05_pricing_discount_analysis) | Are discounts actually driving incremental volume, or just margin loss? | Percentile functions, CTEs | No meaningful discount pattern found across categories — a null result showing the dataset can't support this question without real promotion-level data |
-| 6 | [Sales Trend & YoY Growth](./06_sales_trend_yoy) | What does real sales growth look like, and are we missing zero-sales months? | Recursive CTEs, `LAG()` (multi-offset) | Every month in 2024 beat 2023 (+20.6% to +143.3% YoY) — but MoM swings wildly and can mislead if used alone |
 
 ## Advanced Patterns
 Beyond the core analyses, select projects include production-oriented SQL
@@ -54,6 +46,18 @@ patterns:
 | Indexing strategy (incl. filtered indexes) | [performance/](./performance) |
 | Transactions + TRY/CATCH error handling (verified with a forced-failure test) | [performance/usp_RefreshRFMSnapshot.sql](./performance/usp_RefreshRFMSnapshot.sql) |
 | Reusable data quality checks | [performance/usp_DataQualityCheck.sql](./performance/usp_DataQualityCheck.sql) |
+
+## Projects
+
+| # | Project | Business Question | SQL Techniques | Key Finding |
+|---|---|---|---|---|
+| 1 | [Cohort Retention Analysis](./01_cohort_retention) | What % of new customers come back to buy again, and when? | CTEs, `DATEDIFF`, self-referencing joins | Retention drops to 8.2% by month 1, but rebounds to 10.7% at month 2 — win-back campaigns may be timed too early |
+| 2 | [RFM Segmentation](./02_rfm_segmentation) | Which customers are most valuable, and which are at risk of churning? | `NTILE()`, `CASE`, window functions | Champions spend 5.6x more than Lost customers — but "About to Sleep" customers are nearly as valuable as Loyal ones |
+| 3 | [Market Basket Analysis](./03_market_basket_analysis) | Which products are commonly bought together? | Self-joins, aggregation | Electronics/home_appliances dominate top co-purchase pairs — signal lives at the category level, not individual SKUs |
+| 4 | [Churn Risk Detection](./04_churn_detection) | Which active customers show early signs of going inactive? | `LAG`/`LEAD`, window functions | Flagged customers average 31.5x their normal ordering gap — the threshold catches already-lost customers, not early risks |
+| 5 | [Pricing & Discount Analysis](./05_pricing_discount_analysis) | Are discounts actually driving incremental volume, or just margin loss? | Percentile functions, CTEs | No meaningful discount pattern found across categories — a null result showing the dataset can't support this question without real promotion-level data |
+| 6 | [Sales Trend & YoY Growth](./06_sales_trend_yoy) | What does real sales growth look like, and are we missing zero-sales months? | Recursive CTEs, `LAG()` (multi-offset) | Every month in 2024 beat 2023 (+20.6% to +143.3% YoY) — but MoM swings wildly and can mislead if used alone |
+| 7 | [Sales Forecasting (Trend + Seasonality)](./07_sales_forecasting) | What should next month's revenue look like, accounting for seasonality? | Window frames (`ROWS BETWEEN`), scalar subqueries, `CROSS JOIN` | Trend-only forecast for Jan 2025 ($123,884) overshoots by ~$17,300 vs. the seasonality-adjusted forecast ($106,540) |
 
 ## Dataset
 A synthetic e-commerce dataset (`/datasets`) modeled on the structure of the

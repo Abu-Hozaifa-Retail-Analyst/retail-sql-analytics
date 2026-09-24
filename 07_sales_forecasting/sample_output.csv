@@ -1,0 +1,18 @@
+-- Seasonality index by calendar month
+calendar_month,avg_revenue_this_month,overall_avg_revenue,seasonality_index
+1,69836.45,81463.64,0.86
+2,54117.41,81463.64,0.66
+3,64344.24,81463.64,0.79
+4,65198.32,81463.64,0.80
+5,74243.50,81463.64,0.91
+6,88897.17,81463.64,1.09
+7,77986.92,81463.64,0.96
+8,70513.76,81463.64,0.87
+9,75301.87,81463.64,0.92
+10,81770.81,81463.64,1.00
+11,129610.01,81463.64,1.59
+12,125743.25,81463.64,1.54
+
+-- Final forecast output
+forecast_month,recent_trend,january_seasonality_index,forecasted_revenue,naive_forecast_no_seasonality
+2025-01-01,123883.51,0.86,106539.82,123883.51
