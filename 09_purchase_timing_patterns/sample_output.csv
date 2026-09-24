@@ -1,0 +1,34 @@
+-- Day-of-week breakdown
+weekday_name,order_count,revenue
+Monday,585,322894.15
+Tuesday,574,293941.91
+Wednesday,612,309448.05
+Thursday,583,301023.77
+Friday,600,287471.84
+Saturday,600,280397.71
+Sunday,606,302831.69
+
+-- Hour-of-day breakdown
+order_hour,order_count,revenue
+8,292,159282.82
+9,279,149264.38
+10,279,143939.45
+11,270,135253.60
+12,300,165986.93
+13,294,151978.31
+14,337,166687.34
+15,301,149675.72
+16,302,143721.81
+17,309,156819.30
+18,287,144062.32
+19,306,141931.18
+20,289,130173.51
+21,315,159232.45
+
+-- Top 5 peak day+hour windows
+weekday_name,order_hour,order_count
+Friday,17,58
+Friday,14,57
+Wednesday,14,57
+Saturday,18,56
+Friday,16,55

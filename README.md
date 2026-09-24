@@ -33,6 +33,7 @@ correlated)
 | Manual Pearson correlation (no built-in `CORR()` in T-SQL) | Project 8 |
 | Subqueries (scalar) | Projects 1, 2, 4, 7 |
 | `DATEDIFF` / date logic | Projects 1, 2, 4, 6 |
+| `DATENAME` / `DATEPART` / `SET DATEFIRST` | Project 9 |
 | Multi-table JOINs | All projects |
 
 ## Advanced Patterns
@@ -60,6 +61,7 @@ patterns:
 | 6 | [Sales Trend & YoY Growth](./06_sales_trend_yoy) | What does real sales growth look like, and are we missing zero-sales months? | Recursive CTEs, `LAG()` (multi-offset) | Every month in 2024 beat 2023 (+20.6% to +143.3% YoY) — but MoM swings wildly and can mislead if used alone |
 | 7 | [Sales Forecasting (Trend + Seasonality)](./07_sales_forecasting) | What should next month's revenue look like, accounting for seasonality? | Window frames (`ROWS BETWEEN`), scalar subqueries, `CROSS JOIN` | Trend-only forecast for Jan 2025 ($123,884) overshoots by ~$17,300 vs. the seasonality-adjusted forecast ($106,540) |
 | 8 | [Correlation Analysis](./08_correlation_analysis) | Do frequent buyers spend more or less per order — and does item price predict shipping cost? | Manual Pearson correlation (no built-in `CORR()` in T-SQL) | Both correlations are ~0 (r=0.013, r=0.003) — genuine null results showing frequency and order value move independently |
+| 9 | [Purchase Timing Patterns](./09_purchase_timing_patterns) | When do customers actually shop — are there real peak days/hours? | `DATENAME`/`DATEPART`, correct weekday sorting, `SET DATEFIRST` | Volume is nearly flat by day (6.4% spread) and hour — the 3rd null result in a row, pointing to a broader lesson about what this synthetic dataset does and doesn't encode |
 
 ## Dataset
 A synthetic e-commerce dataset (`/datasets`) modeled on the structure of the
