@@ -30,6 +30,7 @@ correlated)
 | `CASE` statements | Project 2 |
 | Self-joins | Project 3 |
 | `CROSS JOIN` | Project 7 |
+| Manual Pearson correlation (no built-in `CORR()` in T-SQL) | Project 8 |
 | Subqueries (scalar) | Projects 1, 2, 4, 7 |
 | `DATEDIFF` / date logic | Projects 1, 2, 4, 6 |
 | Multi-table JOINs | All projects |
@@ -58,6 +59,7 @@ patterns:
 | 5 | [Pricing & Discount Analysis](./05_pricing_discount_analysis) | Are discounts actually driving incremental volume, or just margin loss? | Percentile functions, CTEs | No meaningful discount pattern found across categories — a null result showing the dataset can't support this question without real promotion-level data |
 | 6 | [Sales Trend & YoY Growth](./06_sales_trend_yoy) | What does real sales growth look like, and are we missing zero-sales months? | Recursive CTEs, `LAG()` (multi-offset) | Every month in 2024 beat 2023 (+20.6% to +143.3% YoY) — but MoM swings wildly and can mislead if used alone |
 | 7 | [Sales Forecasting (Trend + Seasonality)](./07_sales_forecasting) | What should next month's revenue look like, accounting for seasonality? | Window frames (`ROWS BETWEEN`), scalar subqueries, `CROSS JOIN` | Trend-only forecast for Jan 2025 ($123,884) overshoots by ~$17,300 vs. the seasonality-adjusted forecast ($106,540) |
+| 8 | [Correlation Analysis](./08_correlation_analysis) | Do frequent buyers spend more or less per order — and does item price predict shipping cost? | Manual Pearson correlation (no built-in `CORR()` in T-SQL) | Both correlations are ~0 (r=0.013, r=0.003) — genuine null results showing frequency and order value move independently |
 
 ## Dataset
 A synthetic e-commerce dataset (`/datasets`) modeled on the structure of the

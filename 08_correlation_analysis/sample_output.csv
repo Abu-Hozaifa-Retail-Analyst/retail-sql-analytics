@@ -1,0 +1,7 @@
+-- Primary: order frequency vs. average order value
+customers_analyzed,correlation_order_count_vs_avg_order_value
+2845,0.013
+
+-- Secondary: price vs. freight (shipping) cost
+line_items_analyzed,correlation_price_vs_freight
+7624,0.003
