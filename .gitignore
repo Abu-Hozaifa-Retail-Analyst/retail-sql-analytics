@@ -1,0 +1,43 @@
+# SQL Server / SSMS
+*.bak
+*.bacpac
+*.mdf
+*.ndf
+*.ldf
+*.dmp
+
+# SQL Server local/user files
+*.user
+*.suo
+*.ncb
+*.opendb
+*.dbmdl
+
+# Visual Studio / SSMS workspace metadata
+.vs/
+.vscode/
+.idea/
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+
+# Local environment / secrets
+.env
+.env.*
+!.env.example
+
+# Python / notebook artifacts (if added later)
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Local data/import/export artifacts
+*.sqlite
+*.db
