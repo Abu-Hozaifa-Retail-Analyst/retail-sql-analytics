@@ -86,7 +86,7 @@ SQL Server 2017+ is required because the setup script uses
 `BULK INSERT` starts with SQL Server 2017. The bulk-import file path is
 resolved from the **SQL Server machine**, not from the SSMS client. If SQL
 Server is remote or containerized, the CSVs must be accessible from that
-environment. citeturn2search0turn0search1
+environment.
 
 ### Step 1 — Clone the repository
 
@@ -160,7 +160,7 @@ the active database.
 
 SQL Server's `USE RetailAnalytics` statement changes the database context for
 the following batch, which is why the setup script explicitly switches into
-the project database. citeturn3search2
+the project database.
 
 ### Step 6 — Run the analytical projects
 
@@ -194,13 +194,13 @@ Check:
 
 Microsoft notes that `BULK INSERT` reads the source file from the server
 running SQL Server and that the Database Engine/security context must be able
-to access the source location. citeturn0search0turn1search2
+to access the source location.
 
 ### "FORMAT = 'CSV' is not recognized."
 
 Use SQL Server 2017+ or import the files through another supported SQL Server
 loading method. CSV support for `BULK INSERT` was introduced in SQL Server
-2017. citeturn2search2
+2017.
 
 ### Row-count check fails
 
