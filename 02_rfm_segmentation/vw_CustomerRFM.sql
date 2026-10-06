@@ -124,7 +124,7 @@ GO
 -- FROM dbo.vw_CustomerRFM
 -- GROUP BY rfm_segment
 -- ORDER BY customer_count DESC;
-USE RetailAnalytics1;
+USE RetailAnalytics;
 GO
 
 -- Run this once, to create the snapshot table
