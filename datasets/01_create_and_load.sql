@@ -18,7 +18,7 @@
 
 IF DB_ID('RetailAnalytics') IS NULL
 BEGIN
-    CREATE DATABASE RetailAnalytics1;
+    CREATE DATABASE RetailAnalytics;
 END
 GO
 
