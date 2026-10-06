@@ -22,7 +22,7 @@ BEGIN
 END
 GO
 
-USE RetailAnalytics1;
+USE RetailAnalytics;
 GO
 
 -- Drop tables if re-running
@@ -77,23 +77,23 @@ GO
    ------------------------------------------------------------ */
 
 BULK INSERT dbo.customers
-FROM 'C:\retail_data\customers.csv'
+FROM "D:\GitHub\retail-sql-analytics\datasets\customers.csv"
 WITH (FORMAT = 'CSV', FIRSTROW = 2, TABLOCK);
 
 BULK INSERT dbo.products
-FROM 'C:\retail_data\products.csv'
+FROM "D:\GitHub\retail-sql-analytics\datasets\products.csv"
 WITH (FORMAT = 'CSV', FIRSTROW = 2, TABLOCK);
 
 BULK INSERT dbo.orders
-FROM 'C:\retail_data\orders.csv'
+FROM "D:\GitHub\retail-sql-analytics\datasets\orders.csv"
 WITH (FORMAT = 'CSV', FIRSTROW = 2, TABLOCK);
 
 BULK INSERT dbo.order_items
-FROM 'C:\retail_data\order_items.csv'
+FROM "D:\GitHub\retail-sql-analytics\datasets\order_items.csv"
 WITH (FORMAT = 'CSV', FIRSTROW = 2, TABLOCK);
 
 BULK INSERT dbo.payments
-FROM 'C:\retail_data\payments.csv'
+FROM "D:\GitHub\retail-sql-analytics\datasets\payments.csv"
 WITH (FORMAT = 'CSV', FIRSTROW = 2, TABLOCK);
 GO
 
