@@ -70,6 +70,40 @@ with realistic seasonality, customer loyalty tiers, and cross-category
 purchase patterns built in. See [`datasets/README.md`](./datasets/README.md)
 for schema details and setup instructions.
 
+## Reproducibility
+
+The repository includes the synthetic CSV files and a complete SQL Server
+setup/load script, so the project can be reproduced from a fresh clone.
+
+**Database:** `RetailAnalytics`  
+**Minimum SQL Server version:** 2017  
+**Setup script:** [`datasets/01_create_and_load.sql`](./datasets/01_create_and_load.sql)  
+**Dataset guide:** [`datasets/README.md`](./datasets/README.md)
+
+### Quick setup
+
+1. Clone the repository.
+2. Open `datasets/01_create_and_load.sql` in SSMS.
+3. Update the single `@DataPath` variable to the folder containing the
+   repository CSV files.
+4. Execute the script.
+5. Confirm the expected row counts:
+   - customers: 4,421
+   - products: 239
+   - orders: 4,421
+   - order_items: 7,624
+   - payments: 4,421
+6. Select the `RetailAnalytics` database in SSMS before running the project
+   queries.
+
+The setup script also validates the key table relationships with foreign-key
+constraints. For remote or containerized SQL Server environments, the CSV
+folder must be accessible from the SQL Server environment itself.
+
+See [`datasets/README.md`](./datasets/README.md) for troubleshooting,
+permissions, remote-server guidance, schema details, and alternative import
+options.
+
 ## Tools
 SQL Server / T-SQL, SSMS
 
