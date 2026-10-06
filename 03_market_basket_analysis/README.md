@@ -1,53 +1,137 @@
 # Market Basket Analysis
 
-## Business Question
-Which products are commonly bought together, so we can improve cross-sell
-recommendations and store/website merchandising?
+## 1. Business Question
 
-## Approach
-Built a co-purchase frequency analysis in SQL Server using a self-join:
-1. Joined `order_items` to itself on `order_id`, matching every pair of
-   distinct products that appeared in the same basket
-2. Used `a.product_id < b.product_id` as the join condition — this single
-   comparison does two jobs at once: it excludes a product from pairing
-   with itself, and it ensures each real-world pair is counted only once
-   (rather than once as A-B and again as B-A)
-3. Grouped by the product pair and counted occurrences across all orders
-4. Joined the `products` table in twice — once per side of the pair — to
-   attach readable category names to each product ID
-5. Ranked pairs by frequency to surface the strongest co-purchase signals
+Which products are commonly bought together, so we can identify practical cross-sell opportunities and improve store or website merchandising?
 
-See [`query.sql`](./query.sql) for the full implementation.
+The analysis focuses on **co-purchase frequency**: how often two distinct products appear in the same order.
 
-## Finding
-Electronics and home_appliances appear together in 9 of the top 20 product
-pairs — nearly half — far more than any other category combination.
-Individual product-pair counts are modest (the top pairs appear together
-only 3-5 times each), but the clustering is consistent: 8 of those 9
-electronics/home_appliances pairs occupy the top of the list, while fashion
-pairs almost exclusively with beauty and furniture with garden. This
-suggests the co-purchase signal lives at the category level rather than in
-any single SKU combination — with 239 distinct products in the catalog,
-random noise wouldn't reliably concentrate 8 of 9 top pairs into the same
-two categories.
+## 2. Dataset & Analytical Grain
 
-**So what:** This points toward category-level cross-sell rules rather
-than individual SKU recommendations — surfacing "customers who buy
-electronics often add home_appliances" at checkout or on product pages
-likely generalizes better than trying to predict which specific items pair
-together. Before rolling this into a recommendation engine, it's worth
-confirming whether the pairing is driven by genuine complementary use
-(e.g. a TV and a soundbar) or just co-occurring purchase timing (e.g. both
-bought during a holiday sale) — the two would call for different
-merchandising strategies.
+The analysis uses the repository's SQL Server retail dataset.
 
-## Sample Output
-| product_a | category_a | product_b | category_b | how_often |
-|---|---|---|---|---|
-| PROD00013 | electronics | PROD00031 | home_appliances | 5 |
-| PROD00017 | electronics | PROD00034 | home_appliances | 5 |
-| PROD00039 | fashion | PROD00083 | beauty | 4 |
-| PROD00115 | toys | PROD00166 | books | 4 |
-| PROD00153 | furniture | PROD00231 | garden | 4 |
+- **Basket grain:** `order_id`
+- **Product grain:** `product_id`
+- **Pair grain:** one unique unordered product pair within an order
+- **Source table:** `order_items`
+- **Product attributes:** `products.product_category_name`
+- **Scope:** all rows available in `order_items`; the current query does not add an `order_status` filter
 
-*(Full output in [`sample_output.csv`](./sample_output.csv))*
+The dataset contains 239 distinct products. Because the analysis counts product pairs within an order, a pair represents products that co-occurred in the same basket; it does not by itself establish that one product caused the purchase of another.
+
+## 3. Methodology
+
+The SQL workflow is:
+
+1. **Self-join `order_items` on `order_id`** to compare products appearing in the same basket.
+2. Use `a.product_id < b.product_id` to:
+   - exclude self-pairs; and
+   - count each unordered pair once rather than counting both A-B and B-A.
+3. **Group by the two product IDs** and count co-purchases.
+4. **Join `products` twice** to attach category names to both sides of the pair.
+5. **Return the top 20 pairs** ordered by co-purchase frequency.
+
+This is a frequency-based market basket analysis rather than a full association-rule model.
+
+## 4. SQL Implementation
+
+The project demonstrates practical T-SQL techniques including:
+
+- Self-joins
+- Join conditions for pair de-duplication
+- `GROUP BY`
+- `COUNT(*)`
+- Multiple joins to the same dimension table
+- `TOP`
+- `ORDER BY`
+- CTE-based query organization
+
+See [`query.sql`](./query.sql) for the implementation.
+
+## 5. Validation
+
+The query design provides several important structural controls:
+
+- `a.product_id < b.product_id` prevents a product from pairing with itself.
+- The same condition ensures A-B and B-A are not counted as separate pairs.
+- Grouping occurs at the product-pair grain.
+- Product IDs are joined back to `products` to retrieve category labels.
+
+The checked sample output also contains 20 rows, matching the query's `TOP 20` requirement.
+
+A production implementation should additionally validate duplicate line-item behavior, order-status scope, and whether repeated quantities of the same product should influence pair frequency.
+
+## 6. Observed Findings
+
+In the current `sample_output.csv`, **10 of the top 20 product pairs (50%) are electronics + home_appliances pairs**.
+
+The strongest pairs appear at frequencies of 5 or 4 co-purchases, while the lower-ranked pairs appear 3 times. Other visible category combinations include fashion + beauty, toys + books, furniture + garden, and sports + sports.
+
+This concentration suggests that the strongest observed co-purchase signal in this sample is at the **category-combination level**, rather than being limited to one individual SKU pair.
+
+The finding should be treated as a descriptive signal: frequency alone does not establish statistical significance, customer intent, complementarity, or causal impact.
+
+## 7. Business Implication
+
+The electronics + home_appliances concentration provides a useful hypothesis for cross-selling.
+
+For example, a retailer could investigate whether customers purchasing electronics frequently have a complementary home-appliance purchase opportunity. However, the current analysis cannot determine whether these products are genuinely complementary, simply purchased during the same shopping occasion, or influenced by a common promotion or seasonal event.
+
+This distinction matters because the appropriate business action would differ between a genuine product complement and a temporary co-purchase pattern.
+
+## 8. Recommendations
+
+### Immediate business tests
+
+- Test **category-level cross-sell placements** for electronics and home_appliances.
+- Review the individual SKU pairs behind the category signal before creating specific recommendations.
+- Compare co-purchase patterns across stores, channels, and time periods if those dimensions become available.
+- Check whether promotions or seasonal events explain the observed concentration.
+
+### Analytical next step
+
+Extend the analysis from raw frequency to association-rule metrics such as:
+
+- **Support** — how common the pair is across all baskets.
+- **Confidence** — how often B appears when A appears.
+- **Lift** — whether A and B co-occur more often than expected from their individual frequencies.
+
+These measures would provide stronger evidence for recommendation and merchandising decisions than frequency alone.
+
+## 9. Limitations
+
+- The current analysis ranks pairs by frequency only; it does not calculate support, confidence, or lift.
+- Several top pairs have relatively low observed frequencies (3–5), so the signal should be validated on a larger or longer transaction history before operational use.
+- The query does not explicitly filter `order_status`.
+- The analysis does not control for promotions, seasonality, channel, store, or customer segment.
+- Co-purchase frequency is descriptive and does not establish causality.
+- The dataset is a practice/synthetic retail dataset, so findings should not be presented as real-world market behavior.
+- The current query counts matching `order_items` rows, so duplicate line items or multiple quantities require explicit business-rule validation if the analysis is adapted for production.
+
+## 10. Reproducibility
+
+1. Complete the database setup described in [`datasets/README.md`](../datasets/README.md).
+2. Select the `RetailAnalytics` database in SQL Server.
+3. Run [`query.sql`](./query.sql).
+4. Compare the result with [`sample_output.csv`](./sample_output.csv).
+
+The query is written for **SQL Server / T-SQL**.
+
+## 11. Portfolio Skills Demonstrated
+
+- Retail basket and cross-sell analysis
+- SQL Server / T-SQL
+- Self-join design
+- Product-level and category-level analysis
+- Data-grain awareness
+- Analytical validation
+- Business interpretation
+- Merchandising and recommendation thinking
+- Translating descriptive SQL findings into testable business actions
+
+## 12. Project Files
+
+| File | Purpose |
+|---|---|
+| [`query.sql`](./query.sql) | Main market basket SQL analysis |
+| [`sample_output.csv`](./sample_output.csv) | Sample result containing the top 20 product pairs |
