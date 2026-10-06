@@ -1,4 +1,4 @@
-# Retail SQL Analytics
+# Retail SQL Analytics — Customer Intelligence, Sales Performance & Business Analysis
 
 ![SQL Server](https://img.shields.io/badge/SQL_Server-CC2927?style=flat&logo=microsoftsqlserver&logoColor=white)
 ![T-SQL](https://img.shields.io/badge/T--SQL-4479A1?style=flat&logo=databricks&logoColor=white)
