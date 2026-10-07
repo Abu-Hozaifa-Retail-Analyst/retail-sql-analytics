@@ -162,7 +162,7 @@ Dataset documentation: [datasets/README.md](./datasets/README.md)
 
 **SQL:** Self-joins · aggregation · product/category joins
 
-**Observed finding:** Electronics and home-appliances appear together in **9 of the top 20 product pairs**, with 8 of those 9 pairs near the top of the ranking.
+**Observed finding:** Electronics and home-appliances appear together in **10 of the top 20 product pairs**, representing half of the top-20 ranking.
 
 **Business implication:** The stronger signal appears at category level; individual pair counts remain modest.
 
@@ -204,7 +204,7 @@ Dataset documentation: [datasets/README.md](./datasets/README.md)
 
 **SQL:** Recursive CTE · date spine · LAG() · NULLIF
 
-**Observed finding:** Every month in **2024 exceeded the corresponding month in 2023**, with YoY growth ranging from **20.6% to 143.3%**.
+**Observed finding:** Every month in **2024 exceeded the corresponding month in 2023**, with YoY growth ranging from **20.6% to 144.5%**.
 
 **Business implication:** The dataset shows broad YoY growth, while month-over-month volatility can distort short-term interpretation.
 
@@ -246,7 +246,7 @@ Both relationships are effectively zero in this dataset.
 
 **SQL:** DATENAME() · DATEPART() · SET DATEFIRST · date/time aggregation
 
-**Observed finding:** Daily order counts range from **574 to 612**, a spread of only **6.4%**. Hourly demand is similarly distributed, with no clear dominant hour.
+**Observed finding:** Daily order counts range from **574 to 612**, a range equal to about **6.4% of average daily volume**. Hourly demand is similarly distributed, with no clear dominant hour.
 
 **Business implication:** This dataset does not show a strong recurring time-of-day demand pattern.
 
