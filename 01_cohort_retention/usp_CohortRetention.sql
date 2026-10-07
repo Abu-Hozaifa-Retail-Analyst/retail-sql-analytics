@@ -18,7 +18,8 @@
 
    Naming convention: same as query.sql (descriptive CTE names, full table names).
    ============================================================ */
-
+USE RetailAnalytics;
+GO
 CREATE OR ALTER PROCEDURE dbo.usp_CohortRetention
     @start_date DATE = NULL,
     @end_date   DATE = NULL

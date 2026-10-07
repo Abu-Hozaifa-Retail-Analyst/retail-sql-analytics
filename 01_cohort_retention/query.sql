@@ -8,7 +8,8 @@
    Naming convention: CTE names say what they hold; base tables are
    referenced by their full names; output column names are unchanged.
    ============================================================ */
-
+USE RetailAnalytics;
+GO
 WITH customer_first_purchase AS (
     -- Step 1: find each real customer's first purchase month.
     -- NOTE: customer_id is unique per ORDER in this schema;
