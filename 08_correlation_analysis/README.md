@@ -48,7 +48,6 @@ Pearson's `r` ranges from **-1 to +1**:
 - Values near **-1** indicate a strong negative linear relationship.
 - Values near **0** indicate little or no linear relationship.
 
-genui{"learning_viz":{"type_id":"CORRELATION","initial_values":{"pattern":"positive"}}}
 
 ## 4. SQL Implementation
 
