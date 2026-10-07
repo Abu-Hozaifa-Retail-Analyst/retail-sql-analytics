@@ -1,61 +1,162 @@
-# Sales Forecasting (Trend + Seasonality)
+# Sales Forecasting — Trend + Seasonality
 
-## Business Question
-Based on historical sales patterns, what should we expect revenue to look
-like next month — accounting for the fact that some months (like
-November/December) are naturally bigger than others? A forecast built on
-trend alone risks being misled by whatever happened most recently, without
-knowing whether that period was typical or unusual for the calendar.
+## 1. Business Question
 
-## Approach
-Built a lightweight, SQL-native forecast (no external ML library) by
-combining two independent signals:
-1. **Seasonality index** — for each calendar month, `(average revenue for
-   that month) / (average revenue across all months)`. A scalar subquery
-   supplies the overall average alongside each grouped row, since a plain
-   `AVG()` inside `GROUP BY` can't see across groups on its own
-2. **Trailing 3-month moving average** — using a window function with an
-   explicit **window frame** (`ROWS BETWEEN 2 PRECEDING AND CURRENT ROW`),
-   smoothing out single-month noise to surface the underlying trend
-   direction. This is a different window function pattern than earlier
-   projects — instead of the whole partition or one fixed offset row, it
-   defines a sliding 3-row window that moves forward one month at a time
-3. **Combined forecast** — `(most recent moving average) × (seasonality
-   index for the target month)`, joined together with a `CROSS JOIN`
-   since both sides are single, unrelated values with nothing to match on
+Based on historical monthly sales, what should the business expect for the next month when recent trend and recurring calendar seasonality point in different directions?
 
-See [`query.sql`](./query.sql) for the full implementation.
+This project builds a transparent SQL-native forecast for **January 2025** by combining a recent 3-month trend signal with a calendar-month seasonality index.
 
-## Finding
-A trend-only forecast for January 2025 projects **$123,884** in revenue,
-but adjusting for January's seasonal weakness — a **0.86 seasonality
-index**, meaning the month historically runs 14% below average — drops the
-forecast to **$106,540**, a gap of roughly **$17,300**. This gap exists
-because the 3-month trailing average pulls the trend upward from November
-and December's holiday peak (the highest revenue of the entire dataset),
-so a naive forecast effectively assumes that holiday-level momentum
-carries straight into January — when historically, January is one of the
-two weakest months of the year (0.86, second only to February's 0.66).
+## 2. Dataset & Analytical Grain
 
-**So what:** Relying on trend alone would lead the business to
-over-forecast January — risking over-ordering inventory, over-staffing, or
-setting a sales target that undershoots by design. Any forecast built on a
-short trailing window should be paired with a seasonality adjustment
-before it's used for planning, not treated as a standalone number.
+The analysis uses the repository's SQL Server retail dataset.
 
-## Sample Output
+- **Time grain:** calendar month
+- **Transaction scope:** orders where `order_status = 'delivered'`
+- **Revenue measure:** `SUM(order_items.price)`
+- **Historical period:** monthly sales available through December 2024
+- **Forecast target:** January 2025
+- **Seasonality grain:** calendar month number (1–12)
 
-**Seasonality index by month:**
-| calendar_month | seasonality_index |
+The forecast is intentionally lightweight and interpretable. It does not use an external machine-learning library or claim to be a production forecasting model.
+
+## 3. Methodology
+
+The forecast combines two independent signals:
+
+### 3.1 Monthly sales baseline
+
+Delivered order-item revenue is aggregated to calendar month using `DATEFROMPARTS(YEAR(...), MONTH(...), 1)`.
+
+### 3.2 Seasonality index
+
+For each calendar month, the analysis calculates:
+
+`seasonality index = average revenue for that calendar month / overall average monthly revenue`
+
+This allows January 2023 and January 2024 to contribute to a shared January seasonal pattern.
+
+### 3.3 Recent trend
+
+A **trailing 3-month moving average** is calculated using:
+
+`ROWS BETWEEN 2 PRECEDING AND CURRENT ROW`
+
+The latest available moving average becomes the recent trend signal.
+
+### 3.4 Forecast
+
+The January forecast is calculated as:
+
+`forecasted revenue = latest 3-month moving average × January seasonality index`
+
+A trend-only value is retained as a naive comparison so the business impact of the seasonal adjustment can be seen directly.
+
+## 4. SQL Implementation
+
+The project demonstrates practical T-SQL techniques including:
+
+- CTEs
+- Monthly aggregation
+- `DATEFROMPARTS()`
+- `MONTH()`
+- Scalar subqueries
+- `AVG()`
+- Window functions
+- Explicit window frames
+- `ROWS BETWEEN ... PRECEDING AND CURRENT ROW`
+- `TOP 1` with ordered latest-period selection
+- `CROSS JOIN` for combining independent single-row signals
+- SQL-native baseline forecasting
+
+See [query.sql](./query.sql) for the implementation.
+
+## 5. Validation
+
+The analysis includes several validation checks:
+
+- The seasonality output contains **12 calendar months**, one for each month number from 1 to 12.
+- The overall average monthly revenue is consistently **81,463.64** across the seasonality calculations.
+- January's seasonality index is **0.86**, meaning its historical average revenue is approximately 14% below the overall monthly average.
+- February has the lowest seasonality index at **0.66**.
+- November and December have the strongest seasonal indices at **1.59** and **1.54**.
+- The latest 3-month moving average used by the forecast is **123,883.51**.
+- The final forecast is calculated directly as `123,883.51 × 0.86 = 106,539.82` after rounding.
+- The naive forecast without seasonality remains **123,883.51**, making the seasonal adjustment transparent.
+
+These checks validate the arithmetic and structure of the forecast; they do **not** establish that the forecast is accurate on future unseen data.
+
+## 6. Observed Findings
+
+The trend-only January 2025 forecast is **123,883.51**, while the seasonality-adjusted forecast is **106,539.82**.
+
+The difference is approximately **17,343.69**, or about **14.0% lower** than the trend-only value.
+
+January has a seasonality index of **0.86**, while November and December have much stronger historical indices of **1.59** and **1.54**. The latest 3-month trend is therefore influenced by the strong November–December period, while the January seasonal factor pulls the forecast downward.
+
+The result illustrates why a short trailing trend should not automatically be carried into the next calendar period without considering recurring seasonal behavior.
+
+## 7. Business Implication
+
+A retailer using only the recent 3-month trend could plan around approximately **123.9K** of January revenue, while the simple seasonality-adjusted baseline suggests approximately **106.5K**.
+
+This difference can matter for planning decisions such as sales targets, staffing, inventory allocation, and purchasing. However, the forecast should be treated as a planning baseline rather than a guaranteed outcome.
+
+The SQL-native approach is particularly useful as a transparent benchmark: more advanced forecasting methods can be compared against this baseline to determine whether added complexity actually improves out-of-sample accuracy.
+
+## 8. Recommendations
+
+### Business planning
+
+- Use the seasonality-adjusted result as a **baseline scenario**, not as a committed target.
+- Compare the forecast with inventory, staffing, and sales-capacity plans before operational decisions are made.
+- Review November and December separately because holiday-period strength can materially influence a short trailing window.
+
+### Analytical next steps
+
+- Backtest the forecasting method on historical periods rather than evaluating it only on the January 2025 point.
+- Compare against simple baselines such as naive and seasonal-naive forecasts.
+- Measure MAE, RMSE, WAPE, and forecast bias on out-of-sample periods.
+- Test longer and shorter moving-average windows.
+- Add promotion, pricing, inventory availability, store, category, and channel drivers when reliable data becomes available.
+- Evaluate whether more advanced models provide a meaningful accuracy improvement over this transparent baseline.
+
+## 9. Limitations
+
+- This is a **single-period forecast example** for January 2025, not a validated production forecasting system.
+- The model uses only historical revenue, recent trend, and calendar-month seasonality.
+- The 3-month moving average can be sensitive to unusual recent periods.
+- The seasonality index is estimated from the available historical years and may be unstable with a small number of observations.
+- No chronological backtesting or out-of-sample accuracy metrics are included in this SQL project.
+- No confidence or prediction intervals are produced.
+- No promotions, pricing, inventory availability, holidays, store changes, customer mix, or channel effects are modeled.
+- The revenue measure is `SUM(order_items.price)` and does not represent a full financial profit or cash-flow measure.
+- The dataset is a practice/synthetic retail dataset, so the forecast should not be presented as a real market forecast.
+
+## 10. Reproducibility
+
+1. Complete the database setup described in [datasets/README.md](../datasets/README.md).
+2. Select the `RetailAnalytics` database in SQL Server.
+3. Run [query.sql](./query.sql).
+4. Compare the result with [sample_output.csv](./sample_output.csv).
+
+The query is written for **SQL Server / T-SQL**.
+
+## 11. Portfolio Skills Demonstrated
+
+- Retail sales forecasting
+- Trend and seasonality analysis
+- SQL Server / T-SQL
+- Moving averages
+- Window functions and window frames
+- Seasonality indices
+- Baseline forecasting
+- Forecast transparency and validation
+- Business planning interpretation
+- Recognizing the difference between a baseline and a validated forecasting model
+
+## 12. Project Files
+
+| File | Purpose |
 |---|---|
-| 1 (Jan) | 0.86 |
-| 2 (Feb) | 0.66 |
-| 11 (Nov) | 1.59 |
-| 12 (Dec) | 1.54 |
-
-**Final forecast:**
-| forecast_month | recent_trend | january_seasonality_index | forecasted_revenue | naive_forecast_no_seasonality |
-|---|---|---|---|---|
-| 2025-01-01 | 123883.51 | 0.86 | 106539.82 | 123883.51 |
-
-*(Full output in [`sample_output.csv`](./sample_output.csv))*
+| [query.sql](./query.sql) | SQL-native trend + seasonality forecast for January 2025 |
+| [sample_output.csv](./sample_output.csv) | Seasonality indices and final forecast output |
