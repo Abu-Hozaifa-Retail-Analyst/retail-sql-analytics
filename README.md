@@ -28,7 +28,7 @@ This repository addresses those questions through **nine focused SQL analyses** 
 
 ## Analytical Workflow
 
-
+```text
 Transactional Data
        |
        v
@@ -58,7 +58,7 @@ Business Interpretation
        |
        v
 Recommendations + Limitations
-
+```
 
 ## Technical Skills Demonstrated
 
@@ -67,6 +67,7 @@ Recommendations + Limitations
 - CTEs and recursive CTEs
 - Window functions: LAG(), NTILE(), PERCENTILE_CONT()
 - Explicit window frames
+- Deterministic scoring (fixed rules and tie-breakers for window functions)
 - Self-joins and CROSS JOIN
 - CASE-based business classification
 - Aggregation and GROUP BY
@@ -80,7 +81,7 @@ Recommendations + Limitations
 
 ## Data Model
 
-
+```text
 customers
    | customer_id
    v
@@ -92,7 +93,7 @@ order_items
    | product_id
    v
 products
-
+```
 
 | Parent | Child | Relationship |
 |---|---|---|
@@ -108,7 +109,7 @@ This is an Olist-style model where:
 - customer_id identifies the customer record associated with an order.
 - customer_unique_id identifies the actual person across orders.
 
-Customer-level retention, RFM, and churn analysis therefore uses customer_unique_id. Using customer_id as the person-level identifier would incorrectly make repeat customers appear to be one-time buyers.
+Customer-level retention, RFM, and churn analysis therefore uses customer_unique_id. Using customer_id as the person-level identifier would incorrectly make repeat customers appear to be one-time buyers. In this dataset, 4,421 customer_id values belong to only 3,000 real people.
 
 ## Dataset
 
@@ -130,29 +131,31 @@ Dataset documentation: [datasets/README.md](./datasets/README.md)
 
 ## 1. Customer Cohort Retention
 
-**Business question:** Of customers who made their first purchase in a given month, what percentage return later?
+**Business question:** Of customers who made their first purchase in a given month, what percentage return later? Is growth coming from repeat customers, or from new one-time buyers?
 
-**SQL:** CTEs · DATEDIFF · customer identity modeling · aggregation
+**SQL:** CTEs · DATEDIFF · customer identity modeling · aggregation · parameterized stored procedure
 
-**Observed finding:** Retention falls to **8.2% by month 1** and rebounds to **10.7% at month 2** in the analyzed dataset.
+**Observed finding:** Month-1 retention averages **8.2%** and stays between 8% and 11% through month 4, then falls to **5.0% at month 5** (lower than month 4 in all 19 cohorts that reached it). Month 2 (10.7%) beats month 1 in **14 of 22 cohorts**, which is suggestive but not statistically conclusive.
 
-**Business implication:** Early post-purchase retention deserves investigation; the month-2 rebound means the pattern is not a simple monotonic decline.
+**Business implication:** Most customers buy once, and growth is acquisition-driven: the average cohort grew 16% from 2023 to 2024 while month-1 retention stayed flat (8.2% vs 8.1%). The repurchase window appears to be roughly months 1 to 4.
 
-**Potential action:** Test post-purchase and win-back timing, measuring incremental repeat purchase rather than assuming timing causes the pattern.
+**Potential action:** Focus retention effort on months 1 to 4, A/B test win-back timing (day 30 vs day 45 to 60), and confirm with day-level gaps between orders, since calendar-month buckets blur the window.
 
 [View Project 1 ->](./01_cohort_retention)
 
 ## 2. RFM Customer Segmentation
 
-**Business question:** Which customers are most valuable, and which segments deserve retention attention?
+**Business question:** Which customers are most valuable and worth protecting, and which are showing signs of churn risk?
 
-**SQL:** CTEs · NTILE() · CASE · window functions
+**SQL:** CTEs · NTILE() · fixed-rule scoring · CASE · reusable view · snapshot procedure
 
-**Observed finding:** Champions average **$1,688.59** in spend versus **$301.42** for Lost customers. About to Sleep customers average **$1,256.99**.
+**Observed finding:** Champions are **6.9%** of scored customers and bring **23.2%** of revenue (average spend **$2,484.91**, versus **$346.64** for Lost). Champions, Loyal Customers and At Risk together (13.6% of customers) bring **41.6%**. At Risk and About to Sleep hold **18.3%** of revenue, but last ordered 15 to 17 months ago on average.
 
-**Business implication:** Customer value is highly uneven, so retention strategy should consider both value and recency.
+**Method note:** Frequency uses fixed rules because about 80% of customers have exactly one order. An earlier NTILE-based version gave identical customers different scores, so its segments changed with row order; the corrected version is deterministic and stable under different tie-breaks.
 
-**Potential action:** Protect high-value customers, investigate deteriorating high-value segments, and test targeted rather than blanket offers.
+**Business implication:** Revenue is concentrated in a small group of repeat buyers, and a sizable share sits with valuable customers who have gone quiet.
+
+**Potential action:** Protect Champions, test a personal win-back offer for At Risk customers first (93 repeat buyers, $185K), and nudge New Customers toward a second order inside the Project 1 repurchase window.
 
 [View Project 2 ->](./02_rfm_segmentation)
 
@@ -257,7 +260,13 @@ Both relationships are effectively zero in this dataset.
 # Cross-Project Business Findings
 
 ### Customer value is concentrated
-RFM shows substantial differences in spend between customer segments. Retention decisions should therefore consider customer value alongside recency.
+RFM shows that 13.6% of customers (Champions, Loyal and At Risk) bring 41.6% of revenue, while 72% of customers are mostly one-time buyers who bring 34%. Cohort retention (Project 1) shows the same one-time-buyer pattern from a different angle, so retention decisions should consider customer value alongside recency.
+
+### Retention windows and customer segments point to the same action
+Project 1 suggests the repurchase window is months 1 to 4, and Project 2 shows that most New Customers are still inside it. A second-purchase nudge during that window is the most direct way to convert one-time buyers.
+
+### Window-function ties can silently change results
+In RFM, NTILE on a column where 80% of customers share the same value gave different segments depending on row order. Fixed scoring rules and deterministic tie-breakers made the results reproducible, and a tie-break sensitivity check confirmed they are stable.
 
 ### Churn detection needs calibration
 The churn analysis demonstrates that a mathematically consistent rule can still be operationally too late. Threshold selection should be validated against the desired intervention window.
@@ -283,6 +292,8 @@ Data quality is treated as part of the analytical workflow.
 - Row-count sanity checks
 - Explicit delivered-order filtering
 - Customer identity validation
+- Result reconciliation (segment customers and revenue match source totals)
+- Tie-break sensitivity checks for window-function scoring
 - Transaction rollback testing
 - Reusable data-quality procedure
 - Documented assumptions and limitations
@@ -342,7 +353,7 @@ Full setup guide: [datasets/README.md](./datasets/README.md)
 
 # Repository Structure
 
-
+```text
 retail-sql-analytics/
 |
 +-- 01_cohort_retention/
@@ -369,7 +380,7 @@ retail-sql-analytics/
 +-- .gitignore
 +-- LICENSE
 +-- README.md
-
+```
 
 # Project Limitations
 
@@ -398,7 +409,7 @@ Knowing what the data **cannot** answer is part of responsible analytics.
 
 This repository is part of my broader **Retail Analytics portfolio**, focused on the workflow:
 
-
+```text
 Data Quality
     |
     v
@@ -412,7 +423,7 @@ Recommendations
     |
     v
 Portfolio Documentation
-
+```
 
 The project is intentionally built around retail/e-commerce business questions rather than generic SQL exercises.
 
