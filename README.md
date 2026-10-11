@@ -161,15 +161,15 @@ Dataset documentation: [datasets/README.md](./datasets/README.md)
 
 ## 3. Market Basket Analysis
 
-**Business question:** Which products are commonly purchased together?
+**Business question:** Which products are commonly bought together, so cross-sell recommendations and merchandising can improve?
 
-**SQL:** Self-joins · aggregation · product/category joins
+**SQL:** Self-joins · DISTINCT baskets · support / confidence / lift · multi-CTE category roll-up
 
-**Observed finding:** Electronics and home-appliances appear together in **10 of the top 20 product pairs**, representing half of the top-20 ranking.
+**Observed finding:** At product level only 8 of 3,822 pairs reach 4 co-purchases, and electronics + home appliances look dominant (27 of 70 pairs seen 3+ times) mainly because those categories have the smallest catalogs. At category level, five pairs are bought together **1.7 to 2.4 times more than chance** (furniture + garden 2.43, books + toys 2.25, electronics + home appliances 2.24, beauty + sports 1.85, beauty + fashion 1.74); the other 40 pairs are at 0.83 or below.
 
-**Business implication:** The stronger signal appears at category level; individual pair counts remain modest.
+**Business implication:** The co-purchase signal lives at category level. Product-pair counts are too thin for SKU-level recommendations, and catalog size can make a category look stronger than it is.
 
-**Potential action:** Test category-level cross-sell rules, then validate with larger volumes and support/confidence/lift metrics.
+**Potential action:** Test category-level cross-sell rules with an A/B test that measures the incremental attach rate, and revisit SKU-level rules once volume grows.
 
 [View Project 3 ->](./03_market_basket_analysis)
 
@@ -265,8 +265,8 @@ RFM shows that 13.6% of customers (Champions, Loyal and At Risk) bring 41.6% of 
 ### Retention windows and customer segments point to the same action
 Project 1 suggests the repurchase window is months 1 to 4, and Project 2 shows that most New Customers are still inside it. A second-purchase nudge during that window is the most direct way to convert one-time buyers.
 
-### Window-function ties can silently change results
-In RFM, NTILE on a column where 80% of customers share the same value gave different segments depending on row order. Fixed scoring rules and deterministic tie-breakers made the results reproducible, and a tie-break sensitivity check confirmed they are stable.
+### Ties can silently change results
+In RFM, NTILE on a column where 80% of customers share the same value gave different segments depending on row order. In market basket analysis, only 8 pairs reach the top count, so a TOP 20 list was filled by an arbitrary subset of 62 tied pairs. Fixed scoring rules, deterministic tie-breakers and TOP ... WITH TIES made the results reproducible.
 
 ### Churn detection needs calibration
 The churn analysis demonstrates that a mathematically consistent rule can still be operationally too late. Threshold selection should be validated against the desired intervention window.
@@ -278,7 +278,7 @@ Pricing, correlation, and purchase-timing analyses produce weak or null relation
 The forecasting analysis shows how calendar effects can materially change a revenue expectation compared with a trend-only baseline.
 
 ### Aggregation can reveal stronger business signals
-Market basket analysis shows stronger concentration at category level than at individual SKU-pair level.
+Market basket analysis shows the signal at category level (five category pairs with lift of 1.7 to 2.4) while individual SKU-pair counts are too thin. Raw counts can also mislead: a category with a small catalog repeats the same pairs more often, so lift is the fairer measure.
 
 # Data Quality & Governance
 
@@ -293,7 +293,7 @@ Data quality is treated as part of the analytical workflow.
 - Explicit delivered-order filtering
 - Customer identity validation
 - Result reconciliation (segment customers and revenue match source totals)
-- Tie-break sensitivity checks for window-function scoring
+- Tie-break sensitivity checks for window-function scoring and ranked lists
 - Transaction rollback testing
 - Reusable data-quality procedure
 - Documented assumptions and limitations
