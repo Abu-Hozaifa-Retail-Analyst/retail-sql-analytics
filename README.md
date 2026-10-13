@@ -175,15 +175,15 @@ Dataset documentation: [datasets/README.md](./datasets/README.md)
 
 ## 4. Churn Risk Detection
 
-**Business question:** Which repeat customers are unusually overdue compared with their own historical purchase rhythm?
+**Business question:** When is a customer overdue relative to their own buying pattern, and at what overdue ratio is it still worth trying to save them?
 
-**SQL:** LAG() · window functions · customer-level behavioral baselines
+**SQL:** LAG() · recursive date spine · backtest with EXISTS · temp table
 
-**Observed finding:** Flagged customers average **31.5x their normal ordering gap**, indicating the current threshold identifies customers who appear already lost rather than genuinely early-stage risks.
+**Observed finding:** The original 2x rule flags 381 of 574 repeat customers (average 7.7x overdue), and 210 of them are already 5x or more overdue. A backtest at 17 month-end snapshots shows the chance of ordering again within 90 days falls from **51%** (under 1x overdue) to **31%** (1 to 1.5x), **18%** (1.5 to 2x), **9%** (2 to 3x) and **1%** (5x and above).
 
-**Business implication:** A technically valid churn rule can still be poorly calibrated for an early-warning objective.
+**Business implication:** A 2x trigger fires after most customers are already gone. The savable window is about 1 to 2x, and only 67 customers are in it now.
 
-**Potential action:** Recalibrate the threshold around earlier warning points and evaluate it against known retention outcomes.
+**Potential action:** Tier the triggers (1x reminder, 1.5x offer, 3x hand-over to win-back), act on the 67 early-warning customers, and A/B test with a holdout group to measure incremental return.
 
 [View Project 4 ->](./04_churn_detection)
 
@@ -269,7 +269,7 @@ Project 1 suggests the repurchase window is months 1 to 4, and Project 2 shows t
 In RFM, NTILE on a column where 80% of customers share the same value gave different segments depending on row order. In market basket analysis, only 8 pairs reach the top count, so a TOP 20 list was filled by an arbitrary subset of 62 tied pairs. Fixed scoring rules, deterministic tie-breakers and TOP ... WITH TIES made the results reproducible.
 
 ### Churn detection needs calibration
-The churn analysis demonstrates that a mathematically consistent rule can still be operationally too late. Threshold selection should be validated against the desired intervention window.
+A mathematically consistent rule can still be operationally too late. A backtest shows the chance of returning within 90 days falls from 51% (under 1x overdue) to 18% (1.5 to 2x) and 9% (2 to 3x), so a 2x trigger fires after most customers are gone. Thresholds should be validated against outcomes, not chosen by feel.
 
 ### Null results are still useful
 Pricing, correlation, and purchase-timing analyses produce weak or null relationships. Good analytics includes identifying when the available data cannot support a business conclusion.
@@ -294,6 +294,7 @@ Data quality is treated as part of the analytical workflow.
 - Customer identity validation
 - Result reconciliation (segment customers and revenue match source totals)
 - Tie-break sensitivity checks for window-function scoring and ranked lists
+- Backtesting rules against known outcomes
 - Transaction rollback testing
 - Reusable data-quality procedure
 - Documented assumptions and limitations
