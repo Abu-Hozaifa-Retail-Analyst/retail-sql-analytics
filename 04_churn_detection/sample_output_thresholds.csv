@@ -1,0 +1,6 @@
+threshold,flagged_snapshots,pct_of_snapshots_flagged,pct_not_returning,pct_non_returners_caught
+1.0,2510,61.8,89.6,74.6
+1.5,2069,51.0,94.0,64.6
+2.0,1745,43.0,96.3,55.8
+3.0,1290,31.8,98.2,42.1
+5.0,727,17.9,99.0,23.9
