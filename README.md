@@ -73,7 +73,7 @@ Recommendations + Limitations
 - Aggregation and GROUP BY
 - Scalar subqueries
 - Date/time analysis
-- Manual Pearson correlation
+- Manual Pearson correlation with confidence intervals (Fisher z)
 - Stored procedures and reusable views
 - Transactions and TRY/CATCH
 - Filtered/composite indexes
@@ -189,15 +189,15 @@ Dataset documentation: [datasets/README.md](./datasets/README.md)
 
 ## 5. Pricing & Discount Analysis
 
-**Business question:** Are lower prices or deeper discounts associated with higher sales volume?
+**Business question:** Do lower-priced or more-discounted items sell in higher volume, and where does the typical selling price sit relative to list price?
 
-**SQL:** PERCENTILE_CONT() · CTEs · category analysis
+**SQL:** PERCENTILE_CONT() · CTEs · manual Pearson correlation with a Fisher confidence interval
 
-**Observed finding:** Median discount values cluster around **-2.1% to -3.0%** across categories. The dataset does not provide meaningful discount variation for a reliable discount-volume conclusion.
+**Observed finding:** Median selling price sits **2.0% to 3.0% above list** in every category, and about 60% of items sold above list (prices vary roughly from 10% below to 15% above list). Price shows no link with volume: product level r = **0.05** (95% CI -0.07 to 0.18, n = 239), month level r = **-0.19** (CI -0.55 to 0.23, n = 24), and Nov-Dec sells **62% more items per month at the same price** (2.49% vs 2.50% above list).
 
-**Business implication:** This is a valid null result: the available data cannot answer the promotion-effectiveness question reliably.
+**Business implication:** This is a valid null result: the data has no real discount strategy, so it cannot say whether discounts work.
 
-**Potential action:** Add promotion IDs, promotion periods, list price, selling price, units, margin, and comparable non-promoted periods.
+**Potential action:** Add promotion IDs, promotion periods, list price, selling price, units, margin, and comparable non-promoted periods, then run a controlled price test.
 
 [View Project 5 ->](./05_pricing_discount_analysis)
 
@@ -272,7 +272,7 @@ In RFM, NTILE on a column where 80% of customers share the same value gave diffe
 A mathematically consistent rule can still be operationally too late. A backtest shows the chance of returning within 90 days falls from 51% (under 1x overdue) to 18% (1.5 to 2x) and 9% (2 to 3x), so a 2x trigger fires after most customers are gone. Thresholds should be validated against outcomes, not chosen by feel.
 
 ### Null results are still useful
-Pricing, correlation, and purchase-timing analyses produce weak or null relationships. Good analytics includes identifying when the available data cannot support a business conclusion.
+Pricing, correlation, and purchase-timing analyses produce weak or null relationships. Good analytics includes identifying when the available data cannot support a business conclusion. Reporting the confidence interval shows how large an effect the data can still rule out.
 
 ### Seasonality matters for planning
 The forecasting analysis shows how calendar effects can materially change a revenue expectation compared with a trend-only baseline.
